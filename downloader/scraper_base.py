@@ -104,6 +104,18 @@ class BaseScraper(ABC):
                 )
                 response.raise_for_status()
                 return response
+            except requests.HTTPError as e:
+                if e.response is not None and 400 <= e.response.status_code < 500:
+                    logger.debug(
+                        f"[{self.name}] {e.response.status_code} for: {url}"
+                    )
+                    return None
+                logger.warning(
+                    f"[{self.name}] Request failed (attempt {attempt + 1}/"
+                    f"{self.config.max_retries}): {url} - {e}"
+                )
+                if attempt < self.config.max_retries - 1:
+                    time.sleep(self.config.retry_delay * (attempt + 1))
             except requests.RequestException as e:
                 logger.warning(
                     f"[{self.name}] Request failed (attempt {attempt + 1}/"
@@ -290,6 +302,17 @@ class BaseScraper(ABC):
 
                 return data
 
+            except requests.HTTPError as e:
+                if e.response is not None and 400 <= e.response.status_code < 500:
+                    logger.debug(
+                        f"[{self.name}] {e.response.status_code} downloading: {url}"
+                    )
+                    return None
+                logger.warning(
+                    f"[{self.name}] Image download failed (attempt {attempt + 1}): {url} - {e}"
+                )
+                if attempt < self.config.max_retries - 1:
+                    time.sleep(self.config.retry_delay * (attempt + 1))
             except requests.RequestException as e:
                 logger.warning(
                     f"[{self.name}] Image download failed (attempt {attempt + 1}): {url} - {e}"
