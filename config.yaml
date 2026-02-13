@@ -1,0 +1,271 @@
+# Photo Downloader Configuration
+# ================================
+
+# Base directory for downloaded images
+download_dir: "./downloads"
+
+# Number of images to download per year/make/model combination
+images_per_combination: 20
+
+# Minimum image dimensions (pixels) - skip smaller images
+min_width: 800
+min_height: 600
+
+# Maximum concurrent downloads
+max_concurrent: 3
+
+# Delay between requests (seconds) - be respectful to servers
+request_delay: 1.5
+
+# Request timeout (seconds)
+request_timeout: 30
+
+# User agent for requests
+user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+# Retry settings
+max_retries: 3
+retry_delay: 2
+
+# Whether to use Selenium for JavaScript-heavy sites
+use_selenium: false
+
+# Sources to scrape (in priority order)
+sources:
+  - name: netcarshow
+    enabled: true
+    base_url: "https://www.netcarshow.com"
+    priority: 1
+  - name: wikimedia
+    enabled: true
+    base_url: "https://commons.wikimedia.org"
+    priority: 2
+  - name: motor1
+    enabled: true
+    base_url: "https://www.motor1.com"
+    priority: 3
+  - name: audi_media
+    enabled: true
+    base_url: "https://www.audi-mediacenter.com"
+    priority: 4
+  - name: bmw_media
+    enabled: true
+    base_url: "https://www.press.bmwgroup.com"
+    priority: 5
+  - name: mercedes_media
+    enabled: true
+    base_url: "https://media.mercedes-benz.com"
+    priority: 6
+  - name: porsche_media
+    enabled: true
+    base_url: "https://newsroom.porsche.com"
+    priority: 7
+  - name: ferrari_media
+    enabled: true
+    base_url: "https://media.ferrari.com"
+    priority: 8
+  - name: bentley_media
+    enabled: true
+    base_url: "https://www.bentleymedia.com"
+    priority: 9
+  - name: rolls_royce_media
+    enabled: true
+    base_url: "https://www.press.rolls-roycemotorcars.com"
+    priority: 10
+  - name: lamborghini_media
+    enabled: true
+    base_url: "https://media.lamborghini.com"
+    priority: 11
+  - name: mclaren_media
+    enabled: true
+    base_url: "https://cars.mclaren.press"
+    priority: 12
+  - name: jaguar_media
+    enabled: true
+    base_url: "https://media.jaguar.com"
+    priority: 13
+  - name: aston_martin_media
+    enabled: true
+    base_url: "https://media.astonmartin.com"
+    priority: 14
+  - name: bugatti_media
+    enabled: true
+    base_url: "https://newsroom.bugatti.com"
+    priority: 15
+  - name: maserati_media
+    enabled: true
+    base_url: "https://media.maserati.com"
+    priority: 16
+  - name: pagani_media
+    enabled: true
+    base_url: "https://www.pagani.com/press"
+    priority: 17
+  - name: koenigsegg_media
+    enabled: true
+    base_url: "https://www.koenigsegg.com/media"
+    priority: 18
+  - name: lotus_media
+    enabled: true
+    base_url: "https://media.lotuscars.com"
+    priority: 19
+  - name: rimac_media
+    enabled: true
+    base_url: "https://rimac-automobili.com/media"
+    priority: 20
+  - name: pininfarina_media
+    enabled: true
+    base_url: "https://automobili-pininfarina.com/media-hub"
+    priority: 21
+  - name: gordon_murray_media
+    enabled: true
+    base_url: "https://gordonmurrayautomotive.com/media-centre"
+    priority: 22
+
+# Brands and their known models to search for
+# Add/remove models as needed
+brands:
+  Audi:
+    - A3
+    - A4
+    - A5
+    - A6
+    - A7
+    - A8
+    - Q3
+    - Q5
+    - Q7
+    - Q8
+    - e-tron
+    - e-tron GT
+    - RS3
+    - RS5
+    - RS6
+    - RS7
+    - R8
+    - TT
+  BMW:
+    - 2 Series
+    - 3 Series
+    - 4 Series
+    - 5 Series
+    - 7 Series
+    - 8 Series
+    - X1
+    - X3
+    - X5
+    - X7
+    - Z4
+    - M3
+    - M4
+    - M5
+    - M8
+    - i4
+    - i7
+    - iX
+  Mercedes-Benz:
+    - A-Class
+    - C-Class
+    - E-Class
+    - S-Class
+    - CLA
+    - CLE
+    - GLA
+    - GLC
+    - GLE
+    - GLS
+    - AMG GT
+    - EQS
+    - EQE
+    - Maybach
+    - SL
+  Porsche:
+    - 911
+    - 718 Cayman
+    - 718 Boxster
+    - Cayenne
+    - Macan
+    - Panamera
+    - Taycan
+  Ferrari:
+    - 296 GTB
+    - 296 GTS
+    - SF90 Stradale
+    - Roma
+    - Purosangue
+    - 812
+    - F8 Tributo
+  Bentley:
+    - Continental GT
+    - Flying Spur
+    - Bentayga
+  Rolls-Royce:
+    - Phantom
+    - Ghost
+    - Spectre
+    - Cullinan
+    - Wraith
+    - Dawn
+  Lamborghini:
+    - Huracán
+    - Revuelto
+    - Urus
+    - Aventador
+  McLaren:
+    - 750S
+    - Artura
+    - GT
+    - 720S
+    - 765LT
+  Jaguar:
+    - F-Type
+    - F-Pace
+    - I-Pace
+    - XF
+    - XE
+  Aston Martin:
+    - DB12
+    - Vantage
+    - DBS
+    - DBX
+    - Valkyrie
+  Bugatti:
+    - Chiron
+    - Bolide
+    - Mistral
+    - Tourbillon
+  Maserati:
+    - MC20
+    - GranTurismo
+    - Grecale
+    - Levante
+    - Ghibli
+    - Quattroporte
+  Pagani:
+    - Huayra
+    - Utopia
+  Koenigsegg:
+    - Jesko
+    - Gemera
+    - CC850
+    - Regera
+  Lotus:
+    - Emira
+    - Eletre
+    - Emeya
+    - Evija
+  Rimac:
+    - Nevera
+  Pininfarina:
+    - Battista
+  Gordon Murray:
+    - T.50
+    - T.33
+
+# Years to search for
+years:
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
