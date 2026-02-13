@@ -1,7 +1,53 @@
-"""Image categorizer - classifies car images as interior or exterior."""
+"""Image categorizer - classifies car images into exterior/interior/trunk/engine."""
 
 import re
 
+
+# Keywords for trunk/cargo area shots (checked first - most specific)
+TRUNK_KEYWORDS = [
+    "trunk open",
+    "trunk space",
+    "trunk capacity",
+    "boot space",
+    "boot open",
+    "cargo space",
+    "cargo area",
+    "cargo capacity",
+    "cargo volume",
+    "luggage compartment",
+    "luggage space",
+    "luggage capacity",
+    "storage space",
+    "storage compartment",
+    "load area",
+    "load space",
+    "kofferraum",  # German: trunk
+    "coffre",      # French: trunk
+    "bagagliaio",  # Italian: trunk
+]
+
+# Keywords for engine bay shots (checked second - specific)
+ENGINE_KEYWORDS = [
+    "engine bay",
+    "engine compartment",
+    "engine room",
+    "engine detail",
+    "motor bay",
+    "motor compartment",
+    "motor detail",
+    "under the hood",
+    "under the bonnet",
+    "under hood",
+    "under bonnet",
+    "powerplant",
+    "engine block",
+    "cylinder head",
+    "valve cover",
+    "intake manifold",
+    "motorraum",           # German: engine bay
+    "compartiment moteur", # French: engine bay
+    "vano motore",         # Italian: engine bay
+]
 
 # Keywords that strongly indicate interior shots
 INTERIOR_KEYWORDS = [
@@ -25,7 +71,6 @@ INTERIOR_KEYWORDS = [
     "back seat",
     "upholstery",
     "leather",
-    "trim",
     "headliner",
     "door panel",
     "gauge",
@@ -35,11 +80,7 @@ INTERIOR_KEYWORDS = [
     "armrest",
     "glovebox",
     "glove box",
-    "boot",
-    "trunk interior",
-    "cargo",
     "ambient lighting",
-    "display",
     "touchscreen",
     "head-up",
     "heads-up",
@@ -86,7 +127,6 @@ EXTERIOR_KEYWORDS = [
     "rim",
     "tire",
     "tyre",
-    "exhaust",
     "spoiler",
     "wing",
     "diffuser",
@@ -97,12 +137,8 @@ EXTERIOR_KEYWORDS = [
     "body",
     "paintwork",
     "paint",
-    "color",
-    "colour",
-    "chrome",
     "badge",
     "emblem",
-    "logo",
     "windshield",
     "windscreen",
     "side mirror",
@@ -120,7 +156,22 @@ EXTERIOR_KEYWORDS = [
     "exterieur",  # French/German: exterior
 ]
 
-# Filename patterns
+# Filename patterns per category
+TRUNK_FILE_PATTERNS = [
+    r"trunk",
+    r"boot[\-_\s]?(?:space|open|capacity)",
+    r"cargo",
+    r"luggage",
+    r"kofferraum",
+]
+
+ENGINE_FILE_PATTERNS = [
+    r"engine",
+    r"motor[\-_\s]?(?:bay|compartment|detail|room)",
+    r"powertrain",
+    r"under[\-_\s]?(?:hood|bonnet)",
+]
+
 INTERIOR_FILE_PATTERNS = [
     r"int(?:erior)?[\-_\s]",
     r"cabin",
@@ -143,69 +194,52 @@ EXTERIOR_FILE_PATTERNS = [
     r"aussen",
 ]
 
+# All categories with their keyword/pattern lists
+CATEGORIES = {
+    "trunk":    (TRUNK_KEYWORDS,    TRUNK_FILE_PATTERNS),
+    "engine":   (ENGINE_KEYWORDS,   ENGINE_FILE_PATTERNS),
+    "interior": (INTERIOR_KEYWORDS, INTERIOR_FILE_PATTERNS),
+    "exterior": (EXTERIOR_KEYWORDS, EXTERIOR_FILE_PATTERNS),
+}
+
 
 def classify_image(filename="", alt_text="", caption="", page_context=""):
     """
-    Classify an image as 'interior' or 'exterior' based on available metadata.
-
-    Uses filename, alt text, caption, and surrounding page context to determine
-    the image category. Returns 'exterior' as default when classification is
-    ambiguous.
-
-    Args:
-        filename: The image filename
-        alt_text: Alt text from the img tag
-        caption: Caption text near the image
-        page_context: Additional text context from the page
+    Classify an image as exterior, interior, trunk, or engine.
 
     Returns:
-        tuple: (category, confidence) where category is 'interior' or 'exterior'
-               and confidence is a float 0.0-1.0
+        tuple: (category, confidence) where confidence is 0.0-1.0
     """
-    interior_score = 0
-    exterior_score = 0
+    scores = {cat: 0.0 for cat in CATEGORIES}
 
-    # Combine all text sources, weighted differently
     text_sources = [
-        (filename.lower(), 3.0),      # Filename is most reliable
-        (alt_text.lower(), 2.5),      # Alt text is very reliable
-        (caption.lower(), 2.0),       # Caption is reliable
-        (page_context.lower(), 1.0),  # Page context is least reliable
+        (filename.lower(), 3.0),
+        (alt_text.lower(), 2.5),
+        (caption.lower(), 2.0),
+        (page_context.lower(), 1.0),
     ]
 
-    for text, weight in text_sources:
-        if not text:
-            continue
+    for cat, (keywords, file_patterns) in CATEGORIES.items():
+        for text, weight in text_sources:
+            if not text:
+                continue
+            for keyword in keywords:
+                if keyword in text:
+                    scores[cat] += weight
 
-        for keyword in INTERIOR_KEYWORDS:
-            if keyword in text:
-                interior_score += weight
+        # Check filename patterns (high confidence)
+        fname_lower = filename.lower()
+        for pattern in file_patterns:
+            if re.search(pattern, fname_lower):
+                scores[cat] += 4.0
 
-        for keyword in EXTERIOR_KEYWORDS:
-            if keyword in text:
-                exterior_score += weight
-
-    # Check filename patterns (high confidence)
-    fname_lower = filename.lower()
-    for pattern in INTERIOR_FILE_PATTERNS:
-        if re.search(pattern, fname_lower):
-            interior_score += 4.0
-
-    for pattern in EXTERIOR_FILE_PATTERNS:
-        if re.search(pattern, fname_lower):
-            exterior_score += 4.0
-
-    # Determine classification
-    total = interior_score + exterior_score
+    total = sum(scores.values())
     if total == 0:
-        return "exterior", 0.5  # Default to exterior with low confidence
+        return "exterior", 0.5
 
-    if interior_score > exterior_score:
-        confidence = interior_score / total
-        return "interior", min(confidence, 1.0)
-    else:
-        confidence = exterior_score / total
-        return "exterior", min(confidence, 1.0)
+    best = max(scores, key=scores.get)
+    confidence = scores[best] / total
+    return best, min(confidence, 1.0)
 
 
 def extract_vehicle_info(text):

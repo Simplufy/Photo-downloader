@@ -25,8 +25,18 @@ class Config:
         return Path(self._data.get("download_dir", "./downloads"))
 
     @property
+    def category_targets(self):
+        """Per-category image targets. Defaults to 12 ext / 6 int / 1 trunk / 1 engine."""
+        return self._data.get("category_targets", {
+            "exterior": 12,
+            "interior": 6,
+            "trunk": 1,
+            "engine": 1,
+        })
+
+    @property
     def images_per_combination(self):
-        return self._data.get("images_per_combination", 20)
+        return sum(self.category_targets.values())
 
     @property
     def min_width(self):

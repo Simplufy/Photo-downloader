@@ -126,29 +126,39 @@ class Orchestrator:
 
         print(f"\nProcessing {total_combinations} brand/model/year combinations...\n")
 
+        category_targets = self.config.category_targets
+
         for brand, models in sorted(brands.items()):
             for model, model_years in sorted(models.items()):
                 for year in model_years:
                     combination_count += 1
-                    existing = self.file_manager.get_count(brand, model, year)
-                    target = self.config.images_per_combination
 
-                    if existing >= target:
+                    # Check per-category needs
+                    needed_by_cat = {}
+                    for cat, target in category_targets.items():
+                        have = self.file_manager.get_category_count(brand, model, year, cat)
+                        if have < target:
+                            needed_by_cat[cat] = target - have
+
+                    if not needed_by_cat:
+                        total = self.config.images_per_combination
                         print(
                             f"[{combination_count}/{total_combinations}] "
-                            f"{brand} {model} {year}: Already have {existing}/{target} images, skipping"
+                            f"{brand} {model} {year}: Already have {total}/{total} images, skipping"
                         )
                         continue
 
-                    needed = target - existing
+                    total_needed = sum(needed_by_cat.values())
+                    breakdown = ", ".join(
+                        f"{n} {c}" for c, n in needed_by_cat.items()
+                    )
                     print(
                         f"\n[{combination_count}/{total_combinations}] "
-                        f"{brand} {model} ({year}) - Need {needed} more images "
-                        f"(have {existing}/{target})"
+                        f"{brand} {model} ({year}) - Need {total_needed} more ({breakdown})"
                     )
 
                     self._download_for_combination(
-                        brand, model, year, needed,
+                        brand, model, year, needed_by_cat,
                         source_filter=source_filter,
                         dry_run=dry_run,
                     )
@@ -160,21 +170,23 @@ class Orchestrator:
         self.file_manager.save_manifest()
         self.file_manager.print_summary()
 
-    def _download_for_combination(self, brand, model, year, needed,
+    def _download_for_combination(self, brand, model, year, needed_by_cat,
                                    source_filter=None, dry_run=False):
         """Download images for a single brand/model/year combination."""
         scrapers = self._get_scrapers_for_brand(brand, source_filter)
-        downloaded = 0
+        downloaded_by_cat = {cat: 0 for cat in needed_by_cat}
+        total_needed = sum(needed_by_cat.values())
+        total_downloaded = 0
 
         for source_name, scraper in scrapers:
-            if downloaded >= needed:
+            if total_downloaded >= total_needed:
                 break
 
-            remaining = needed - downloaded
+            remaining = total_needed - total_downloaded
             print(f"  Searching {scraper.name}...", end=" ", flush=True)
 
             try:
-                results = scraper.search_images(brand, model, year, max_results=remaining * 2)
+                results = scraper.search_images(brand, model, year, max_results=remaining * 3)
                 print(f"found {len(results)} candidates")
             except Exception as e:
                 print(f"error: {e}")
@@ -187,7 +199,7 @@ class Orchestrator:
             # Process results with progress bar
             for result in tqdm(results, desc=f"  Downloading from {scraper.name}",
                               leave=False, disable=dry_run):
-                if downloaded >= needed:
+                if total_downloaded >= total_needed:
                     break
 
                 # Skip already-downloaded URLs
@@ -202,10 +214,15 @@ class Orchestrator:
                     page_context=result.page_context,
                 )
 
+                # Skip if this category is already full
+                if category not in needed_by_cat or downloaded_by_cat.get(category, 0) >= needed_by_cat[category]:
+                    continue
+
                 if dry_run:
                     print(f"    [DRY RUN] Would download: {result.url[:80]}...")
                     print(f"              Category: {category} (confidence: {confidence:.2f})")
-                    downloaded += 1
+                    downloaded_by_cat[category] = downloaded_by_cat.get(category, 0) + 1
+                    total_downloaded += 1
                     continue
 
                 # Download the image
@@ -238,7 +255,9 @@ class Orchestrator:
                     self.file_manager.mark_url_downloaded(result.url, str(save_path))
                     self.file_manager.record_content_hash(image_data)
                     self.file_manager.increment_count(brand, model, year)
-                    downloaded += 1
+                    self.file_manager.increment_category_count(brand, model, year, category)
+                    downloaded_by_cat[category] = downloaded_by_cat.get(category, 0) + 1
+                    total_downloaded += 1
 
                     logger.info(
                         f"Saved: {save_path} ({category}, confidence: {confidence:.2f})"
@@ -247,7 +266,10 @@ class Orchestrator:
                 except OSError as e:
                     logger.error(f"Failed to save image: {e}")
 
-        print(f"  -> Downloaded {downloaded}/{needed} images for {brand} {model} ({year})")
+        breakdown = ", ".join(
+            f"{downloaded_by_cat.get(c, 0)}/{n} {c}" for c, n in needed_by_cat.items()
+        )
+        print(f"  -> Downloaded {total_downloaded}/{total_needed} for {brand} {model} ({year}): {breakdown}")
 
     def _validate_image(self, image_data):
         """Validate image dimensions meet minimum requirements."""
@@ -278,7 +300,8 @@ class Orchestrator:
 
         print("\nConfigured targets:")
         brands = self.config.get_brand_models()
-        target = self.config.images_per_combination
+        category_targets = self.config.category_targets
+        target_per = self.config.images_per_combination
 
         total_needed = 0
         total_have = 0
@@ -288,12 +311,14 @@ class Orchestrator:
                 for year in model_years:
                     count = self.file_manager.get_count(brand, model, year)
                     total_have += count
-                    total_needed += target
+                    total_needed += target_per
 
         total_combinations = sum(
             len(years) for models in brands.values() for years in models.values()
         )
+        breakdown = ", ".join(f"{n} {c}" for c, n in category_targets.items())
         print(f"  Combinations: {total_combinations}")
+        print(f"  Per combo:    {breakdown}")
         print(f"  Target total: {total_needed} images")
         print(f"  Downloaded:   {total_have} images")
         print(f"  Remaining:    {total_needed - total_have} images")

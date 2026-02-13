@@ -82,12 +82,15 @@ def download(ctx, brand, model, year, limit, source, dry_run):
         len(yrs) for models in brands.values() for yrs in models.values()
     )
 
+    cat_targets = config.category_targets
+    breakdown = " + ".join(f"{n} {c}" for c, n in cat_targets.items())
+
     click.echo("=" * 60)
     click.echo("Photo Downloader")
     click.echo("=" * 60)
     click.echo(f"Brands:  {len(brands)}")
     click.echo(f"Combos:  {total_combos}")
-    click.echo(f"Target:  {config.images_per_combination} images per combination")
+    click.echo(f"Target:  {config.images_per_combination} per combo ({breakdown})")
     click.echo(f"Output:  {config.download_dir}")
     if dry_run:
         click.echo("Mode:    DRY RUN (no downloads)")

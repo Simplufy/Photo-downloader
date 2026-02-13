@@ -4,8 +4,13 @@
 # Base directory for downloaded images
 download_dir: "./downloads"
 
-# Number of images to download per year/make/model combination
-images_per_combination: 20
+# Per-category image targets for each year/make/model combination
+# Total: 12 + 6 + 1 + 1 = 20 images per car
+category_targets:
+  exterior: 12
+  interior: 6
+  trunk: 1
+  engine: 1
 
 # Minimum image dimensions (pixels) - skip smaller images
 min_width: 800

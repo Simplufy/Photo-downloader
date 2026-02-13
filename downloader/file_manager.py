@@ -20,8 +20,10 @@ class FileManager:
         """Load the download manifest tracking all downloaded images."""
         if self._manifest_path.exists():
             with open(self._manifest_path, "r") as f:
-                return json.load(f)
-        return {"downloaded_urls": {}, "file_hashes": set(), "counts": {}}
+                data = json.load(f)
+            data.setdefault("category_counts", {})
+            return data
+        return {"downloaded_urls": {}, "file_hashes": set(), "counts": {}, "category_counts": {}}
 
     def save_manifest(self):
         """Persist the manifest to disk."""
@@ -30,6 +32,7 @@ class FileManager:
             "downloaded_urls": self._manifest["downloaded_urls"],
             "file_hashes": list(self._manifest.get("file_hashes", set())),
             "counts": self._manifest["counts"],
+            "category_counts": self._manifest.get("category_counts", {}),
         }
         with open(self._manifest_path, "w") as f:
             json.dump(data, f, indent=2)
@@ -68,6 +71,17 @@ class FileManager:
         """Increment the download count for a make/model/year."""
         key = self._count_key(make, model, year)
         self._manifest["counts"][key] = self._manifest["counts"].get(key, 0) + 1
+
+    def get_category_count(self, make, model, year, category):
+        """Return count for a specific make/model/year/category."""
+        key = f"{self._count_key(make, model, year)}|{category}"
+        return self._manifest["category_counts"].get(key, 0)
+
+    def increment_category_count(self, make, model, year, category):
+        """Increment count for a specific make/model/year/category."""
+        key = f"{self._count_key(make, model, year)}|{category}"
+        cc = self._manifest["category_counts"]
+        cc[key] = cc.get(key, 0) + 1
 
     def is_url_downloaded(self, url):
         """Check if a URL has already been downloaded."""
