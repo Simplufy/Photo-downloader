@@ -206,13 +206,17 @@ class Orchestrator:
                 if self.file_manager.is_url_downloaded(result.url):
                     continue
 
-                # Classify the image
-                category, confidence = classify_image(
-                    filename=result.filename,
-                    alt_text=result.alt_text,
-                    caption=result.caption,
-                    page_context=result.page_context,
-                )
+                # Use "general" category (no classification) or classify if
+                # multiple categories are configured
+                if list(needed_by_cat.keys()) == ["general"]:
+                    category = "general"
+                else:
+                    category, _confidence = classify_image(
+                        filename=result.filename,
+                        alt_text=result.alt_text,
+                        caption=result.caption,
+                        page_context=result.page_context,
+                    )
 
                 # Skip if this category is already full
                 if category not in needed_by_cat or downloaded_by_cat.get(category, 0) >= needed_by_cat[category]:
@@ -220,7 +224,7 @@ class Orchestrator:
 
                 if dry_run:
                     print(f"    [DRY RUN] Would download: {result.url[:80]}...")
-                    print(f"              Category: {category} (confidence: {confidence:.2f})")
+                    print(f"              Category: {category}")
                     downloaded_by_cat[category] = downloaded_by_cat.get(category, 0) + 1
                     total_downloaded += 1
                     continue
@@ -259,9 +263,7 @@ class Orchestrator:
                     downloaded_by_cat[category] = downloaded_by_cat.get(category, 0) + 1
                     total_downloaded += 1
 
-                    logger.info(
-                        f"Saved: {save_path} ({category}, confidence: {confidence:.2f})"
-                    )
+                    logger.info(f"Saved: {save_path} ({category})")
 
                 except OSError as e:
                     logger.error(f"Failed to save image: {e}")

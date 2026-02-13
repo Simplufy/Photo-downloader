@@ -26,12 +26,9 @@ class Config:
 
     @property
     def category_targets(self):
-        """Per-category image targets. Defaults to 12 ext / 6 int / 1 trunk / 1 engine."""
+        """Per-category image targets. Defaults to 6 general images."""
         return self._data.get("category_targets", {
-            "exterior": 12,
-            "interior": 6,
-            "trunk": 1,
-            "engine": 1,
+            "general": 6,
         })
 
     @property
