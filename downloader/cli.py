@@ -49,7 +49,7 @@ def download(ctx, brand, model, year, limit, source, dry_run):
 
     orchestrator = Orchestrator(config)
 
-    # Filter brands
+    # Filter brands - now returns {brand: {model: [years]}}
     brands = config.get_brand_models(brand)
     if brand and not brands:
         click.echo(f"Error: Brand '{brand}' not found in config")
@@ -57,22 +57,36 @@ def download(ctx, brand, model, year, limit, source, dry_run):
 
     # Filter models
     if model:
-        if model not in brands.get(brand, []):
+        brand_models = brands.get(brand, {})
+        if model not in brand_models:
             click.echo(f"Error: Model '{model}' not found for brand '{brand}'")
             sys.exit(1)
-        brands = {brand: [model]}
+        brands = {brand: {model: brand_models[model]}}
 
-    # Filter years
-    years = [year] if year else config.years
+    # Filter years - apply to each model's year list
+    if year:
+        filtered = {}
+        for b, models in brands.items():
+            filtered_models = {}
+            for m, years_list in models.items():
+                if year in years_list:
+                    filtered_models[m] = [year]
+            if filtered_models:
+                filtered[b] = filtered_models
+        brands = filtered
 
     # Filter sources
     source_filter = source
+
+    total_combos = sum(
+        len(yrs) for models in brands.values() for yrs in models.values()
+    )
 
     click.echo("=" * 60)
     click.echo("Photo Downloader")
     click.echo("=" * 60)
     click.echo(f"Brands:  {len(brands)}")
-    click.echo(f"Years:   {len(years)}")
+    click.echo(f"Combos:  {total_combos}")
     click.echo(f"Target:  {config.images_per_combination} images per combination")
     click.echo(f"Output:  {config.download_dir}")
     if dry_run:
@@ -81,7 +95,6 @@ def download(ctx, brand, model, year, limit, source, dry_run):
 
     orchestrator.run(
         brands=brands,
-        years=years,
         source_filter=source_filter,
         dry_run=dry_run,
     )
@@ -107,8 +120,8 @@ def list_brands(ctx):
     click.echo("-" * 40)
     for brand, models in sorted(brands.items()):
         click.echo(f"\n{brand}:")
-        for model in models:
-            click.echo(f"  - {model}")
+        for model, years in sorted(models.items()):
+            click.echo(f"  - {model} ({years[0]}-{years[-1]})")
 
 
 @cli.command("list-sources")

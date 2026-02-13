@@ -70,13 +70,22 @@ class Config:
 
     @property
     def brands(self):
-        """Return brands with all model names coerced to strings."""
+        """Return brands as {brand: {model: [years]}} with year ranges expanded."""
         raw = self._data.get("brands", {})
-        return {brand: [str(m) for m in models] for brand, models in raw.items()}
-
-    @property
-    def years(self):
-        return [int(y) for y in self._data.get("years", [])]
+        result = {}
+        for brand, models in raw.items():
+            result[brand] = {}
+            for model, year_range in models.items():
+                model_name = str(model)
+                if isinstance(year_range, str) and "-" in year_range:
+                    start, end = year_range.split("-")
+                    years = list(range(int(start), int(end) + 1))
+                elif isinstance(year_range, list):
+                    years = [int(y) for y in year_range]
+                else:
+                    years = []
+                result[brand][model_name] = years
+        return result
 
     def get_enabled_sources(self):
         """Return sources that are enabled, sorted by priority."""
@@ -86,8 +95,8 @@ class Config:
         )
 
     def get_brand_models(self, brand=None):
-        """Return brand->models mapping, optionally filtered to one brand."""
+        """Return brand->{model: [years]} mapping, optionally filtered to one brand."""
         if brand:
-            models = self.brands.get(brand, [])
+            models = self.brands.get(brand, {})
             return {brand: models} if models else {}
         return dict(self.brands)

@@ -109,25 +109,26 @@ class Orchestrator:
 
         return result
 
-    def run(self, brands, years, source_filter=None, dry_run=False):
+    def run(self, brands, source_filter=None, dry_run=False):
         """
         Execute the full download pipeline.
 
         Args:
-            brands: dict of {brand_name: [model_list]}
-            years: list of years to search
+            brands: dict of {brand_name: {model: [years]}}
             source_filter: if set, only use this source
             dry_run: if True, find images but don't download
         """
         # Calculate total combinations for progress tracking
-        total_combinations = sum(len(models) * len(years) for models in brands.values())
+        total_combinations = sum(
+            len(years) for models in brands.values() for years in models.values()
+        )
         combination_count = 0
 
         print(f"\nProcessing {total_combinations} brand/model/year combinations...\n")
 
         for brand, models in sorted(brands.items()):
-            for model in models:
-                for year in years:
+            for model, model_years in sorted(models.items()):
+                for year in model_years:
                     combination_count += 1
                     existing = self.file_manager.get_count(brand, model, year)
                     target = self.config.images_per_combination
@@ -277,20 +278,21 @@ class Orchestrator:
 
         print("\nConfigured targets:")
         brands = self.config.get_brand_models()
-        years = self.config.years
         target = self.config.images_per_combination
 
         total_needed = 0
         total_have = 0
 
         for brand, models in sorted(brands.items()):
-            for model in models:
-                for year in years:
+            for model, model_years in models.items():
+                for year in model_years:
                     count = self.file_manager.get_count(brand, model, year)
                     total_have += count
                     total_needed += target
 
-        total_combinations = sum(len(m) * len(years) for m in brands.values())
+        total_combinations = sum(
+            len(years) for models in brands.values() for years in models.values()
+        )
         print(f"  Combinations: {total_combinations}")
         print(f"  Target total: {total_needed} images")
         print(f"  Downloaded:   {total_have} images")

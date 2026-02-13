@@ -121,167 +121,161 @@ sources:
     base_url: "https://gordonmurrayautomotive.com/media-centre"
     priority: 22
 
-# Brands and their known models to search for
-# Add/remove models as needed
+# Brands, models, and their actual production year ranges.
+# Format: "start_year-end_year" per model. Only real year/make/model
+# combinations are included to avoid 404 errors.
 brands:
   Audi:
-    - A3
-    - A4
-    - A5
-    - A6
-    - A7
-    - A8
-    - Q3
-    - Q5
-    - Q7
-    - Q8
-    - e-tron
-    - e-tron GT
-    - RS3
-    - RS5
-    - RS6
-    - RS7
-    - R8
-    - TT
-  BMW:
-    - 2 Series
-    - 3 Series
-    - 4 Series
-    - 5 Series
-    - 7 Series
-    - 8 Series
-    - X1
-    - X3
-    - X5
-    - X7
-    - Z4
-    - M3
-    - M4
-    - M5
-    - M8
-    - i4
-    - i7
-    - iX
-  Mercedes-Benz:
-    - A-Class
-    - C-Class
-    - E-Class
-    - S-Class
-    - CLA
-    - CLE
-    - GLA
-    - GLC
-    - GLE
-    - GLS
-    - AMG GT
-    - EQS
-    - EQE
-    - Maybach
-    - SL
-  Porsche:
-    - 911
-    - 718 Cayman
-    - 718 Boxster
-    - Cayenne
-    - Macan
-    - Panamera
-    - Taycan
-  Ferrari:
-    - 296 GTB
-    - 296 GTS
-    - SF90 Stradale
-    - Roma
-    - Purosangue
-    - 812
-    - F8 Tributo
-  Bentley:
-    - Continental GT
-    - Flying Spur
-    - Bentayga
-  Rolls-Royce:
-    - Phantom
-    - Ghost
-    - Spectre
-    - Cullinan
-    - Wraith
-    - Dawn
-  Lamborghini:
-    - Huracán
-    - Revuelto
-    - Urus
-    - Aventador
-  McLaren:
-    - 750S
-    - Artura
-    - GT
-    - 720S
-    - 765LT
-  Jaguar:
-    - F-Type
-    - F-Pace
-    - I-Pace
-    - XF
-    - XE
-  Aston Martin:
-    - DB12
-    - Vantage
-    - DBS
-    - DBX
-    - Valkyrie
-  Bugatti:
-    - Chiron
-    - Bolide
-    - Mistral
-    - Tourbillon
-  Maserati:
-    - MC20
-    - GranTurismo
-    - Grecale
-    - Levante
-    - Ghibli
-    - Quattroporte
-  Pagani:
-    - Huayra
-    - Utopia
-  Koenigsegg:
-    - Jesko
-    - Gemera
-    - CC850
-    - Regera
-  Lotus:
-    - Emira
-    - Eletre
-    - Emeya
-    - Evija
-  Rimac:
-    - Nevera
-  Pininfarina:
-    - Battista
-  Gordon Murray:
-    - T.50
-    - T.33
+    A3: "2005-2026"
+    A4: "2005-2026"
+    A5: "2008-2026"
+    A6: "2005-2026"
+    A7: "2011-2026"
+    A8: "2005-2026"
+    Q3: "2013-2026"
+    Q5: "2009-2026"
+    Q7: "2007-2026"
+    Q8: "2019-2026"
+    e-tron: "2019-2026"
+    e-tron GT: "2022-2026"
+    RS3: "2012-2026"
+    RS5: "2010-2026"
+    RS6: "2008-2026"
+    RS7: "2014-2026"
+    R8: "2007-2026"
+    TT: "2005-2023"
 
-# Years to search for
-years:
-  - 2005
-  - 2006
-  - 2007
-  - 2008
-  - 2009
-  - 2010
-  - 2011
-  - 2012
-  - 2013
-  - 2014
-  - 2015
-  - 2016
-  - 2017
-  - 2018
-  - 2019
-  - 2020
-  - 2021
-  - 2022
-  - 2023
-  - 2024
-  - 2025
-  - 2026
+  BMW:
+    2 Series: "2014-2026"
+    3 Series: "2005-2026"
+    4 Series: "2014-2026"
+    5 Series: "2005-2026"
+    7 Series: "2005-2026"
+    8 Series: "2019-2026"
+    X1: "2010-2026"
+    X3: "2005-2026"
+    X5: "2005-2026"
+    X7: "2019-2026"
+    Z4: "2005-2026"
+    M3: "2005-2026"
+    M4: "2015-2026"
+    M5: "2005-2026"
+    M8: "2020-2026"
+    i4: "2022-2026"
+    i7: "2023-2026"
+    iX: "2022-2026"
+
+  Mercedes-Benz:
+    A-Class: "2013-2026"
+    C-Class: "2005-2026"
+    E-Class: "2005-2026"
+    S-Class: "2005-2026"
+    CLA: "2014-2026"
+    CLE: "2024-2026"
+    GLA: "2014-2026"
+    GLC: "2016-2026"
+    GLE: "2016-2026"
+    GLS: "2017-2026"
+    AMG GT: "2015-2026"
+    EQS: "2022-2026"
+    EQE: "2023-2026"
+    Maybach: "2015-2026"
+    SL: "2005-2026"
+
+  Porsche:
+    911: "2005-2026"
+    718 Cayman: "2017-2026"
+    718 Boxster: "2017-2026"
+    Cayenne: "2005-2026"
+    Macan: "2015-2026"
+    Panamera: "2010-2026"
+    Taycan: "2020-2026"
+
+  Ferrari:
+    296 GTB: "2022-2026"
+    296 GTS: "2023-2026"
+    SF90 Stradale: "2020-2026"
+    Roma: "2020-2026"
+    Purosangue: "2023-2026"
+    812: "2018-2024"
+    F8 Tributo: "2020-2022"
+
+  Bentley:
+    Continental GT: "2005-2026"
+    Flying Spur: "2006-2026"
+    Bentayga: "2016-2026"
+
+  Rolls-Royce:
+    Phantom: "2005-2026"
+    Ghost: "2010-2026"
+    Spectre: "2024-2026"
+    Cullinan: "2019-2026"
+    Wraith: "2014-2023"
+    Dawn: "2016-2023"
+
+  Lamborghini:
+    Huracán: "2015-2024"
+    Revuelto: "2024-2026"
+    Urus: "2019-2026"
+    Aventador: "2012-2022"
+
+  McLaren:
+    750S: "2024-2026"
+    Artura: "2022-2026"
+    GT: "2020-2026"
+    720S: "2018-2023"
+    765LT: "2021-2022"
+
+  Jaguar:
+    F-Type: "2014-2024"
+    F-Pace: "2017-2026"
+    I-Pace: "2019-2026"
+    XF: "2008-2026"
+    XE: "2016-2024"
+
+  Aston Martin:
+    DB12: "2024-2026"
+    Vantage: "2006-2026"
+    DBS: "2008-2026"
+    DBX: "2021-2026"
+    Valkyrie: "2022-2026"
+
+  Bugatti:
+    Chiron: "2017-2026"
+    Bolide: "2021-2026"
+    Mistral: "2023-2026"
+    Tourbillon: "2024-2026"
+
+  Maserati:
+    MC20: "2021-2026"
+    GranTurismo: "2008-2026"
+    Grecale: "2023-2026"
+    Levante: "2017-2026"
+    Ghibli: "2014-2023"
+    Quattroporte: "2005-2026"
+
+  Pagani:
+    Huayra: "2012-2026"
+    Utopia: "2023-2026"
+
+  Koenigsegg:
+    Jesko: "2020-2026"
+    Gemera: "2021-2026"
+    CC850: "2023-2026"
+    Regera: "2016-2026"
+
+  Lotus:
+    Emira: "2022-2026"
+    Eletre: "2023-2026"
+    Emeya: "2024-2026"
+    Evija: "2021-2026"
+
+  Rimac:
+    Nevera: "2022-2026"
+
+  Pininfarina:
+    Battista: "2021-2026"
+
+  Gordon Murray:
+    T.50: "2022-2026"
+    T.33: "2023-2026"
